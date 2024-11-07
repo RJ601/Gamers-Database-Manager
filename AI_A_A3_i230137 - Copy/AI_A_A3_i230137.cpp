@@ -509,7 +509,7 @@ public:
         // create a new file and store the players database there
         file.open("Players_Databse.csv", ios::out);
         // inorder traversal and store
-        preorder_store(players, file);
+        inorder_store(players, file);
         file.close();
 
         // games
@@ -609,17 +609,19 @@ public:
         // file
         file.open("Games_Database.csv", ios::out);
         // inorder store
-        preorder_store_games(games, file);
+        inorder_store_games(games, file);
 
         file.close();
     }
 
-    void preorder_store_games(Game* root, fstream &file)
+    void inorder_store_games(Game* root, fstream &file)
     {
         if (root == NULL)
         {
             return;
         }
+
+        inorder_store_games(root->get_left(), file);
 
         // store root
         file<<root->getGameID()<<',';
@@ -630,17 +632,17 @@ public:
         file<<root->getDownloads()<<',';
         file<<'\n';
 
-        preorder_store_games(root->get_left(), file);
-
-        preorder_store_games(root->get_right(), file);
+        inorder_store_games(root->get_right(), file);
     }
 
-    void preorder_store(Player *root, fstream &file)
+    void inorder_store(Player *root, fstream &file)
     {
         if (root == NULL)
         {
             return;
         }
+
+        inorder_store(root->get_left(), file);
 
         // store root
         file<<root->getPlayerID()<<',';
@@ -650,28 +652,27 @@ public:
         file<<root->getPassword()<<',';
 
         // games played - inorder display
-        preorder_games_played(root->getGames(), file);
+        inorder_games_played(root->getGames(), file);
+
         file<<"\n";
 
-        preorder_store(root->get_left(), file);
-
-        preorder_store(root->get_right(), file);
+        inorder_store(root->get_right(), file);
     }
 
-    void preorder_games_played(Games_played *root, fstream &file)
+    void inorder_games_played(Games_played *root, fstream &file)
     {
         if (root == NULL)
         {
             return;
         }
 
+        inorder_games_played(root->get_left(), file);
+
         file<<root->getGameID()<<',';
         file<<root->getHoursPlayed()<<',';
         file<<root->getAchievementsUnlocked()<<',';
-
-        preorder_games_played(root->get_left(), file);
         
-        preorder_games_played(root->get_right(), file);
+        inorder_games_played(root->get_right(), file);
     }
 
     Game* insert_game(Game *root, Game *&node)
@@ -725,120 +726,14 @@ public:
         return root;
     }
 
-    Game* delete_game(Game *root, string id)
+    void delete_game()
     {
-        if (root == NULL)
-        {
-            cout<<"ID not found"<<endl;
-            return root;
-        }
 
-        if (root->getGameID() < id)
-        {
-            root->set_right(delete_game(root->get_right(), id));
-        }
-        else if (root->getGameID() > id)
-        {
-            root->set_left(delete_game(root->get_left(), id));
-        }
-        else
-        {
-            // node found
-            if (root->get_right() == NULL && root->get_left() == NULL)
-            {
-                delete root;
-                return NULL;
-            }
-
-            // left child only
-            else if (root->get_right() == NULL)
-            {
-                Game* temp = root->get_left();
-                delete root;
-                return temp;
-            }
-
-            // right child only
-            else if (root->get_left() == NULL)
-            {
-                Game *temp = root->get_right();
-                delete root;
-                return temp;
-            }
-
-            // both children
-            else
-            {
-                Game *successor = find_minimum<Game>(root->get_right());
-                root->setGameID(successor->getGameID());
-                delete_game(root->get_right(), successor->getGameID());
-                return root;
-            }
-        }
     }
 
-    Player* delete_player(Player *root, string id)
+    void delete_player()
     {
-        if (root == NULL)
-        {
-            cout<<"ID not found"<<endl;
-            return root;
-        }
 
-        if (root->getPlayerID() < id)
-        {
-            root->set_right(delete_player(root->get_right(), id));
-        }
-        else if (root->getPlayerID() > id)
-        {
-            root->set_left(delete_player(root->get_left(), id));
-        }
-        else
-        {
-            // node found
-            if (root->get_right() == NULL && root->get_left() == NULL)
-            {
-                delete root;
-                return NULL;
-            }
-
-            // left child only
-            else if (root->get_right() == NULL)
-            {
-                Player* temp = root->get_left();
-                delete root;
-                return temp;
-            }
-
-            // right child only
-            else if (root->get_left() == NULL)
-            {
-                Player *temp = root->get_right();
-                delete root;
-                return temp;
-            }
-
-            // both children
-            else
-            {
-                Player *successor = find_minimum<Player>(root->get_right());
-                root->setPlayerID(successor->getPlayerID());
-                delete_player(root->get_right(), successor->getPlayerID());
-                return root;
-            }
-        }
-    }
-
-    template <typename obj>
-    obj* find_minimum(obj* root)
-    {
-        if (root->get_left() == NULL)
-        {
-            return root;
-        }
-
-        root = find_minimum(root->get_left());
-        return root;
     }
 
     void display_players() // inorder
